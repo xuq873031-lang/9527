@@ -1,0 +1,338 @@
+<!doctype html>
+<html lang="zh-CN" data-bs-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ChatWave - Mock Chat SPA</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+    />
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <!-- ========================= 登录 / 注册区域 ========================= -->
+    <section id="authView" class="auth-bg min-vh-100 d-flex align-items-center py-4">
+      <div class="container">
+        <div class="row justify-content-center">
+          <div class="col-12 col-md-9 col-lg-7 col-xl-6">
+            <div class="card border-0 shadow-lg auth-card rounded-4 overflow-hidden">
+              <div class="card-body p-0">
+                <div class="row g-0">
+                  <div class="col-md-5 d-none d-md-flex auth-side p-4 text-white flex-column justify-content-between">
+                    <div>
+                      <h3 class="fw-bold mb-2">ChatWave</h3>
+                      <p class="mb-0 opacity-75">Telegram 风格 Mock 聊天前端</p>
+                    </div>
+                    <div class="small opacity-75">
+                      前后端分离演示：本页仅使用 localStorage + mock API。
+                    </div>
+                  </div>
+                  <div class="col-md-7 p-4 p-md-5">
+                    <ul class="nav nav-pills nav-fill mb-4" role="tablist">
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="loginTabBtn" data-auth-tab="login" type="button">登录</button>
+                      </li>
+                      <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="registerTabBtn" data-auth-tab="register" type="button">注册</button>
+                      </li>
+                    </ul>
+
+                    <!-- 登录表单 -->
+                    <form id="loginForm" class="auth-form" autocomplete="off">
+                      <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="loginUsername" required />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-control" id="loginPassword" required />
+                      </div>
+                      <button class="btn btn-primary w-100 rounded-pill" type="submit">登录并进入</button>
+                    </form>
+
+                    <!-- 注册表单 -->
+                    <form id="registerForm" class="auth-form d-none" autocomplete="off">
+                      <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="registerUsername" required />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">邮箱</label>
+                        <input type="email" class="form-control" id="registerEmail" required />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">密码</label>
+                        <input type="password" class="form-control" id="registerPassword" required />
+                      </div>
+                      <div class="mb-3">
+                        <label class="form-label">确认密码</label>
+                        <input type="password" class="form-control" id="registerConfirmPassword" required />
+                      </div>
+                      <button class="btn btn-success w-100 rounded-pill" type="submit">注册并进入</button>
+                    </form>
+
+                    <p id="authMsg" class="small mt-3 mb-0 text-danger"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================= 主应用区域 ========================= -->
+    <section id="appView" class="d-none app-bg min-vh-100">
+      <div class="container-fluid py-3 py-md-4">
+        <div class="row g-3">
+          <!-- 左侧导航（桌面） -->
+          <aside class="col-md-3 col-lg-2 d-none d-md-block">
+            <div class="glass-card p-3 h-100 d-flex flex-column">
+              <div class="d-flex align-items-center gap-2 mb-3">
+                <img id="sidebarAvatar" class="rounded-circle avatar-40 object-fit-cover" alt="avatar" />
+                <div class="flex-grow-1">
+                  <div class="fw-semibold" id="sidebarNickname"></div>
+                  <small class="text-secondary">在线聊天</small>
+                </div>
+                <button class="btn btn-sm btn-outline-danger" id="logoutBtn" title="退出登录">
+                  <i class="bi bi-box-arrow-right"></i>
+                </button>
+              </div>
+
+              <div class="nav nav-pills flex-column gap-2" id="sideNav">
+                <button class="btn nav-btn active" data-section="messages">
+                  <i class="bi bi-chat-dots me-2"></i>消息
+                  <span id="msgBadgeSide" class="badge text-bg-danger ms-auto d-none"></span>
+                </button>
+                <button class="btn nav-btn" data-section="friends">
+                  <i class="bi bi-people me-2"></i>好友
+                </button>
+                <button class="btn nav-btn" data-section="groups">
+                  <i class="bi bi-collection me-2"></i>群组
+                </button>
+                <button class="btn nav-btn" data-section="profile">
+                  <i class="bi bi-person-circle me-2"></i>个人资料
+                </button>
+              </div>
+            </div>
+          </aside>
+
+          <!-- 移动端顶部 -->
+          <div class="col-12 d-md-none">
+            <div class="glass-card p-2 d-flex align-items-center justify-content-between">
+              <button
+                class="btn btn-outline-primary"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#mobileMenu"
+              >
+                <i class="bi bi-list"></i>
+              </button>
+              <div class="fw-semibold">ChatWave</div>
+              <button class="btn btn-outline-danger" id="logoutBtnMobile">
+                <i class="bi bi-box-arrow-right"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- 右侧内容 -->
+          <main class="col-12 col-md-9 col-lg-10">
+            <!-- 消息页面 -->
+            <section id="messagesSection" class="section-panel h-100">
+              <div class="row g-3 h-100">
+                <div class="col-lg-4">
+                  <div class="glass-card p-3 h-100">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                      <h5 class="mb-0">会话</h5>
+                      <span class="badge text-bg-primary" id="conversationCount">0</span>
+                    </div>
+                    <div id="conversationList" class="conversation-list"></div>
+                  </div>
+                </div>
+
+                <div class="col-lg-8">
+                  <div class="glass-card h-100 d-flex flex-column">
+                    <div class="chat-header p-3 border-bottom d-flex align-items-center justify-content-between">
+                      <div>
+                        <h6 class="mb-0" id="chatTitle">请选择会话</h6>
+                        <small id="chatSubTitle" class="text-secondary"></small>
+                      </div>
+                      <span id="chatTypeBadge" class="badge text-bg-info d-none"></span>
+                    </div>
+
+                    <div id="chatMessages" class="chat-messages p-3"></div>
+
+                    <div class="chat-input-wrap p-3 border-top">
+                      <div id="emojiPanel" class="emoji-panel mb-2 d-none"></div>
+                      <div class="input-group">
+                        <button class="btn btn-outline-secondary" id="emojiToggleBtn" type="button">
+                          <i class="bi bi-emoji-smile"></i>
+                        </button>
+                        <input
+                          id="messageInput"
+                          type="text"
+                          class="form-control"
+                          placeholder="输入消息..."
+                        />
+                        <button id="sendMsgBtn" class="btn btn-primary" type="button">
+                          <i class="bi bi-send"></i>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 好友页面 -->
+            <section id="friendsSection" class="section-panel d-none">
+              <div class="glass-card p-3 p-md-4">
+                <h5>好友系统</h5>
+                <p class="text-secondary small">搜索添加好友（mock）并查看在线状态。</p>
+
+                <div class="row g-2 align-items-end mb-3">
+                  <div class="col-md-8">
+                    <label class="form-label">搜索用户</label>
+                    <input id="friendSearchInput" type="text" class="form-control" placeholder="输入用户名关键词" />
+                  </div>
+                  <div class="col-md-4">
+                    <button id="friendSearchBtn" class="btn btn-primary w-100">搜索并显示 mock 结果</button>
+                  </div>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <h6>搜索结果</h6>
+                    <div id="searchResultList" class="list-group list-group-flush bordered-list"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>我的好友</h6>
+                    <div id="friendList" class="list-group list-group-flush bordered-list"></div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 群组页面 -->
+            <section id="groupsSection" class="section-panel d-none">
+              <div class="glass-card p-3 p-md-4">
+                <h5>群聊管理</h5>
+                <p class="text-secondary small">创建群聊，或向已有群拉好友（全部 mock）。</p>
+
+                <div class="row g-3 mb-4">
+                  <div class="col-md-5">
+                    <label class="form-label">新群名称</label>
+                    <input id="createGroupName" class="form-control" placeholder="例如：产品讨论群" />
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label">选择成员（可多选）</label>
+                    <select id="createGroupMembers" class="form-select" multiple></select>
+                  </div>
+                  <div class="col-md-2 d-flex align-items-end">
+                    <button id="createGroupBtn" class="btn btn-success w-100">创建群聊</button>
+                  </div>
+                </div>
+
+                <div class="row g-3">
+                  <div class="col-md-6">
+                    <h6>我的群聊</h6>
+                    <div id="groupList" class="list-group bordered-list"></div>
+                  </div>
+                  <div class="col-md-6">
+                    <h6>拉好友进群</h6>
+                    <label class="form-label">选择群</label>
+                    <select id="groupSelectForAdd" class="form-select mb-2"></select>
+                    <label class="form-label">选择好友</label>
+                    <select id="friendSelectForGroup" class="form-select mb-2"></select>
+                    <button id="addFriendToGroupBtn" class="btn btn-outline-primary w-100">加入群聊</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- 个人资料页面 -->
+            <section id="profileSection" class="section-panel d-none">
+              <div class="glass-card p-3 p-md-4">
+                <h5>个人资料</h5>
+                <div class="row g-3 mt-1">
+                  <div class="col-md-4 text-center">
+                    <img id="profileAvatar" class="rounded-circle profile-avatar object-fit-cover mb-2" alt="avatar" />
+                    <div class="mb-2">
+                      <label class="btn btn-outline-primary btn-sm">
+                        选择头像
+                        <input id="avatarInput" type="file" accept="image/*" class="d-none" />
+                      </label>
+                    </div>
+                    <small class="text-secondary">使用 FileReader 转 base64 存储在 localStorage</small>
+                  </div>
+                  <div class="col-md-8">
+                    <div class="mb-3">
+                      <label class="form-label">昵称</label>
+                      <input id="profileNickname" class="form-control" />
+                    </div>
+                    <div class="mb-3">
+                      <label class="form-label">签名</label>
+                      <input id="profileSign" class="form-control" />
+                    </div>
+                    <div class="d-flex align-items-center gap-2 mb-3">
+                      <span>明暗主题</span>
+                      <div class="form-check form-switch mb-0">
+                        <input class="form-check-input" type="checkbox" id="themeToggle" />
+                        <label class="form-check-label" for="themeToggle">暗色模式</label>
+                      </div>
+                    </div>
+                    <button id="saveProfileBtn" class="btn btn-primary">保存资料</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </main>
+        </div>
+      </div>
+
+      <!-- 移动端抽屉菜单 -->
+      <div class="offcanvas offcanvas-start" tabindex="-1" id="mobileMenu">
+        <div class="offcanvas-header">
+          <h5 class="offcanvas-title">导航</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+        </div>
+        <div class="offcanvas-body">
+          <div class="nav nav-pills flex-column gap-2" id="mobileNav">
+            <button class="btn nav-btn active" data-section="messages">消息 <span id="msgBadgeMobile" class="badge text-bg-danger ms-1 d-none"></span></button>
+            <button class="btn nav-btn" data-section="friends">好友</button>
+            <button class="btn nav-btn" data-section="groups">群组</button>
+            <button class="btn nav-btn" data-section="profile">个人资料</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 底部 tab（移动端） -->
+      <nav class="mobile-tabbar d-md-none">
+        <button class="mobile-tab active" data-section="messages">
+          <i class="bi bi-chat-dots"></i>
+          <span>消息</span>
+          <em id="msgBadgeBottom" class="dot-badge d-none"></em>
+        </button>
+        <button class="mobile-tab" data-section="friends"><i class="bi bi-people"></i><span>好友</span></button>
+        <button class="mobile-tab" data-section="groups"><i class="bi bi-collection"></i><span>群组</span></button>
+        <button class="mobile-tab" data-section="profile"><i class="bi bi-person-circle"></i><span>我的</span></button>
+      </nav>
+    </section>
+
+    <!-- Bootstrap 5 JS CDN -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+      crossorigin="anonymous"
+    ></script>
+    <script src="./script.js"></script>
+  </body>
+</html>
